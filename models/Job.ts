@@ -1,4 +1,5 @@
 import mongoose, { Document, Model } from 'mongoose';
+import "@/models/Category"
 
 export interface IJob extends Document {
     title: string;
