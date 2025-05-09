@@ -1,177 +1,106 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import {
-  Box,
-  Button,
-  Container,
-  Snackbar,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-  Alert,
-} from "@mui/material";
+import {GetServerSideProps} from "next";
+import {parse} from "cookie";
+import jwt from "jsonwebtoken";
+import {connectDB} from "@/lib/db";
+import JobModel, {IJob} from "@/models/Job";
+import {ICategory} from "@/models/Category";
+import mongoose from "mongoose";
+import HomePage from "@/components/HomePage";
 
-interface User {
-  email: string;
-  password: string;
-  name: string;
-  phone: string;
+const JWT_SECRET = process.env.JWT_SECRET as string;
+
+interface Props {
+    user: { email: string } | null;
+    jobs: JobResponse[];
 }
 
-const users: User[] = [];
+interface IPopulatedJob extends Omit<IJob, 'category'> {
+    category: ICategory;
+}
 
-export default function AuthPage() {
-  const router = useRouter();
-  const [tab, setTab] = useState(0);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [showError, setShowError] = useState(false);
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) router.push("/home");
-  }, []);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
-    setEmail("");
-    setPassword("");
-    setName("");
-    setPhone("");
-    setError("");
-  };
+interface LeanJobDocument {
+    _id: mongoose.Types.ObjectId;
+    title: string;
+    description: string;
+    min_age: number;
+    max_age: number;
+    min_yoe: number;
+    skills: string[];
+    requirements: string[];
+    specifications: string[];
+    educations: string;
+    category: {
+        _id: mongoose.Types.ObjectId;
+        name: string;
+    };
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+interface JobResponse {
+    _id: string;
+    title: string;
+    description: string;
+    min_age: number;
+    max_age: number;
+    min_yoe: number;
+    skills: string[];
+    requirements: string[];
+    specifications: string[];
+    educations: string;
+    category: {
+        _id: string;
+        name: string;
+    };
+}
 
-    if (tab === 0) {
-      try {
-        const res = await fetch("/api/auth/Sign_in", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const cookies = parse(context.req.headers.cookie || '');
+    const token = cookies.token || null;
 
-        const data = await res.json();
+    let user = null;
+    let jobs: JobResponse[] = [];
 
-        if (!res.ok) {
-          throw new Error(data.message || "Login failed");
-        }
-
-        localStorage.setItem("token", data.token);
-        alert("Login successful!");
-        router.push("/home");
-      } catch (err: any) {
-        setError(err.message || "Login failed");
-        setShowError(true);
-      }
-    } else {
-      try {
-        const res = await fetch("/api/auth/Sign_up", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, email, password }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Registration failed");
-        }
-
-        alert("Registration successful!");
-        setTab(0);
-      } catch (err: any) {
-        setError(err.message || "Registration failed");
-        setShowError(true);
-      }
+    if (!token) {
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        };
     }
-  };
 
-  return (
-    <Container maxWidth="sm">
-      <Box mt={10} p={4} boxShadow={3} borderRadius={2}>
-        <Tabs value={tab} onChange={handleTabChange} centered>
-          <Tab label="Login" />
-          <Tab label="Register" />
-        </Tabs>
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string, email: string };
+        user = {email: decoded.email};
 
-        <Typography variant="h5" mt={3} gutterBottom align="center">
-          {tab === 0 ? "Login to your account" : "Create a new account"}
-        </Typography>
+        await connectDB();
+        const jobDocs = await JobModel.find()
+            .populate<IPopulatedJob>('category')
+            .lean<LeanJobDocument[]>();
+        jobs = jobDocs.map(job => ({
+            ...job,
+            _id: job._id.toString(),
+            category: {
+                ...job.category,
+                _id: job.category._id.toString()
+            }
+        }));
 
-        <form onSubmit={handleSubmit}>
-          {tab === 1 && (
-            <>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </>
-          )}
+    } catch (err) {
+        console.error("Token verification failed:", err);
+        return {
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        };
+    }
 
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+    return {
+        props: {user, jobs},
+    };
+};
 
-          {tab === 0 && (
-            <Typography variant="body2" color="textSecondary" mt={1}>
-              Not Registered? Go to the Register tab above.
-            </Typography>
-          )}
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            type="submit"
-            sx={{ mt: 2 }}
-          >
-            {tab === 0 ? "Login" : "Register"}
-          </Button>
-        </form>
-      </Box>
-
-      <Snackbar
-        open={showError}
-        autoHideDuration={4000}
-        onClose={() => setShowError(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="error" onClose={() => setShowError(false)}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </Container>
-  );
+export default function Main({user, jobs}: Props) {
+    return <HomePage user={user} jobs={jobs}/>
 }
