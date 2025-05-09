@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {serialize} from 'cookie';
 import {connectDB} from '@/lib/db';
-import User from '@/models/User';
+import UserModel, {LeanUser} from '@/models/User';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRES_IN = '7d';
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         await connectDB();
 
-        const user = await User.findOne({email});
+        const user = await UserModel.findOne({email}).lean<LeanUser>();
         if (!user) return res.status(401).json({error: 'Invalid credentials.'});
 
         const isMatch = await bcrypt.compare(password, user.password);

@@ -5,6 +5,9 @@ export interface IUser extends Document {
     password: string;
 }
 
+export interface LeanUser extends IUser {
+    _id: mongoose.Types.ObjectId;
+}
 const UserSchema = new mongoose.Schema<IUser>({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
