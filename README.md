@@ -1,40 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🧑‍💼 Job Portal Web App (Next.js + Material UI + JWT)
 
-## Getting Started
+This is a simple job portal web application built using **Next.js**, **Material UI**, and **JWT authentication**. The application allows users to **register, log in, view, create, edit, and delete job posts**. It also uses **private routing** to protect job-related pages.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✅ Features Implemented
+
+* 🔐 **JWT Authentication** (Register + Login)
+* 👤 **Private Routes** (no access without login)
+* 🏠 Home page UI inspired by [career.techforing.com](https://career.techforing.com)
+* 📋 **CRUD on Job Posts**
+
+  * ✅ Create
+  * ✅ Read
+  * ✅ Delete
+  * ✅ Edit is optional and implemented
+* 💼 Material UI used for all design
+* 🧱 Dynamic routing with Next.js
+
+---
+
+## 🛠 Tech Stack
+
+* Frontend: **Next.js (Pages Router)**
+* UI Library: **Material UI v6+**
+* Auth: **JWT**
+* Backend: Built with Next.js API Routes
+
+---
+
+## 📂 Project Structure
+
+```
+tech_foring
+├── README.md
+├── components
+│   ├── CreateUpdateModal.tsx
+│   └── HomePage.tsx
+├── eslint.config.mjs
+├── lib
+│   ├── auth.ts
+│   └── db.ts
+├── middleware.ts
+├── models
+│   ├── Category.ts
+│   ├── Job.ts
+│   └── User.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── pages
+│   ├── _app.tsx
+│   ├── _document.tsx
+│   ├── api
+│   │   ├── categories
+│   │   │   └── index.ts
+│   │   ├── jobs
+│   │   │   ├── [id].ts
+│   │   │   └── index.ts
+│   │   ├── login.ts
+│   │   ├── logout.ts
+│   │   ├── me.ts
+│   │   ├── profile.ts
+│   │   └── register.ts
+│   ├── index.tsx
+│   └── login.tsx
+├── postcss.config.mjs
+├── public
+│   ├── favicon.ico
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── styles
+│   └── globals.css
+├── tsconfig.json
+└── yarn.lock
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `pages/login.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started (Local Setup)
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```bash
+# Clone the repo
+https://github.com/your-username/job-portal.git
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+cd job-portal
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Install dependencies
+npm install; or,
+yarn install
 
-## Learn More
+# Run the app
+npm run dev; or,
+yarn dev
 
-To learn more about Next.js, take a look at the following resources:
+# Visit: http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+> ⚠️ NOTE: Make sure you’re using **Node.js v18+**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📝 Important Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **It may take a moment to log in or create a job** — be patient as state and token validation occur.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+2. **To create a job**:
+
+   * Type the job **title, company, description**, and
+   * **Type the category and press `Enter`** to add it to the job.
+
+3. All pages (except `/login`) are protected by **Private Routing** — users **must be logged in** to access them.
+
+---
+
+## 🌐 Deployment
+
+The app is hosted on **Vercel**. Live Link: https://tech-foring-ef5qcssf9-sanaullahs-projects-574b8a1a.vercel.app/login
+
+---
+
+**Happy coding!**
